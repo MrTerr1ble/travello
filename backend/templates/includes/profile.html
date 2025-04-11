@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Личный кабинет{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4 text-center">Личный кабинет</h1>
+
+    <div class="user-info card shadow-sm p-4 mb-5 bg-white rounded">
+        <h2 class="card-title text-center">{{ user.get_full_name|default:user.username }}</h2>
+        <div class="card-body">
+            <p><strong>Имя пользователя:</strong> {{ user.username }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Дата регистрации:</strong> {{ user.date_joined|date:"d.m.Y H:i" }}</p>
+            <p><strong>Последний вход:</strong> {{ user.last_login|date:"d.m.Y H:i" }}</p>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'api:router-list' %}" class="btn btn-primary">Перейти к маршрутам</a>
+        <a href="{% url 'api:collection-list' %}" class="btn btn-secondary">Перейти к коллекциям</a>
+    </div>
+</div>
+{% endblock %}

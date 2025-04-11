@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}{{ collection.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-3">{{ collection.name }}</h1>
+
+    {% if collection.description %}
+        <p class="lead">{{ collection.description }}</p>
+    {% endif %}
+
+    <hr>
+
+    <h3>Маршруты в коллекции</h3>
+
+    {% if collection.collection_routers.all %}
+        <ul class="list-group">
+            {% for cr in collection.collection_routers.all %}
+                <li class="list-group-item d-flex align-items-center">
+                    {% if cr.router.photo %}
+                        <img src="{{ cr.router.photo.url }}" alt="{{ cr.router.name }}" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" />
+                    {% else %}
+                        <i class="bi bi-map"></i>
+                    {% endif %}
+                    <a href="{% url 'api:router-detail' cr.router.id %}" class="ms-3">
+                        {{ cr.router.name }}
+                    </a>
+                    {% if cr.router.description %}
+                        <p class="mb-0"><small>{{ cr.router.description }}</small></p>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>В этой коллекции пока нет маршрутов.</p>
+    {% endif %}
+
+    {% comment %} {% if user.is_authenticated %}
+        <div class="mt-4">
+            <a href="{% url 'api:add-to-collection' collection.id %}" class="btn btn-primary">Добавить маршрут</a>
+        </div>
+    {% endif %} {% endcomment %}
+</div>
+{% endblock %}

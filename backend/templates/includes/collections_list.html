@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Коллекции{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1 class="my-4">Коллекции</h1>
+
+        <div class="mb-3">
+            <a href="{% url 'api:collection-create' %}" class="btn btn-success">Создать коллекцию</a>
+        </div>
+
+        <div class="row">
+            {% for collection in collections %}
+                <div class="col-md-4">
+                    <div class="card mb-4 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ collection.name }}</h5>
+                            <p class="card-text">{{ collection.description }}</p>
+                            
+                            <p><strong>Маршруты:</strong></p>
+                            <ul>
+                                {% for cr in collection.collection_routers.all %}
+                                    <li>
+                                        <a href="{% url 'api:router-detail' cr.router.id %}" class="text-decoration-none">{{ cr.router.name }}</a>
+                                    </li>
+                                {% empty %}
+                                    <li>Нет маршрутов.</li>
+                                {% endfor %}
+                            </ul>
+                            
+                            <a href="{% url 'api:collection-detail' collection.id %}" class="btn btn-primary btn-sm mt-2">Подробнее</a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p>Коллекций пока нет.</p>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

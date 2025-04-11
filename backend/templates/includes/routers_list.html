@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Список маршрутов{% endblock %}
+
+{% block content %}
+    <div class="router-list page-content">
+        <h1 class="page-header">Маршруты</h1>
+
+        <div class="mb-3">
+            <a href="{% url 'api:router-create' %}" class="btn btn-success">Создать маршрут</a>
+        </div>
+
+        <div class="row">
+            {% for router in routers %}
+                <div class="col-md-4">
+                    <div class="card mb-3 router-card">
+                        {% if router.photo %}
+                            <img src="{{ router.photo.url }}" class="card-img-top" alt="{{ router.name }}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ router.name }}</h5>
+                            <p class="card-text">{{ router.description }}</p>
+                            <a href="{% url 'api:router-detail' router.id %}" class="btn btn-primary">Подробнее</a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p>Маршрутов пока нет.</p>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

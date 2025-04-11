@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Создание маршрута{% endblock %}
+
+{% block content %}
+<h1>Создание маршрута</h1>
+
+<form id="router-form" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label for="id_name" class="form-label">Название</label>
+        {{ form.name }}
+    </div>
+
+    <div class="mb-3">
+        <label for="id_description" class="form-label">Описание</label>
+        {{ form.description }}
+    </div>
+
+    <div class="mb-3">
+        <label for="id_start_date" class="form-label">Дата начала</label>
+        {{ form.start_date }}
+    </div>
+
+    <div class="mb-3">
+        <label for="id_end_date" class="form-label">Дата окончания</label>
+        {{ form.end_date }}
+    </div>
+
+    <div class="mb-3">
+        <label for="id_photo" class="form-label">Фото</label>
+        {{ form.photo }}
+    </div>
+
+    <div class="mb-3">
+        <label for="id_points_of_interest" class="form-label">Точки интереса</label>
+        {{ form.points_of_interest }}
+    </div>
+
+    <button type="submit" class="btn btn-success">Создать</button>
+    <a href="{% url 'api:router-list' %}" class="btn btn-secondary">Отмена</a>
+</form>
+
+<div id="message"></div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('router-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        let formData = new FormData(this);
+
+        fetch("{% url 'api:router-create' %}", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Отображаем сообщение об успешном создании
+                document.getElementById('message').innerHTML = "<div class='alert alert-success'>Маршрут успешно создан!</div>";
+
+                // Обновляем список маршрутов (например, редирект на страницу списка)
+                window.location.href = "{% url 'api:router-list' %}";
+            } else {
+                document.getElementById('message').innerHTML = "<div class='alert alert-danger'>Ошибка при создании маршрута.</div>";
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            document.getElementById('message').innerHTML = "<div class='alert alert-danger'>Произошла ошибка. Попробуйте снова.</div>";
+        });
+    });
+</script>
+{% endblock %}

@@ -1,40 +1,36 @@
 import base64
 
-
 from django.contrib.auth import get_user_model
-from rest_framework import serializers
-from djoser.serializers import UserCreateSerializer, UserSerializer
-
 from django.core.files.base import ContentFile
-
-from trail.models import Routers, PointsOfInterest, Reviews, Collections
+from djoser.serializers import UserCreateSerializer, UserSerializer
+from rest_framework import serializers
+from rest_framework.serializers import CurrentUserDefault, HiddenField
+from trail.models import Collections, Favorite, PointsOfInterest, Reviews, Routers
 
 User = get_user_model()
 
 
 class Base64ImageField(serializers.ImageField):
     def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith('data:image'):
-            img_format, img_str = data.split(';base64,')
-            ext = img_format.split('/')[-1]
-            data = ContentFile(base64.b64decode(img_str), name=f'image.{ext}')
+        if isinstance(data, str) and data.startswith("data:image"):
+            img_format, img_str = data.split(";base64,")
+            ext = img_format.split("/")[-1]
+            data = ContentFile(base64.b64decode(img_str), name=f"image.{ext}")
         return super().to_internal_value(data)
 
 
 class CustomUserSerializer(UserSerializer):
-    is_subscribed = serializers.SerializerMethodField()
     avatar = Base64ImageField(allow_null=True, required=False)
 
     class Meta:
         model = User
         fields = (
-            'id',
-            'email',
-            'username',
-            'first_name',
-            'last_name',
-            'is_subscribed',
-            'avatar',
+            "id",
+            "email",
+            "username",
+            "first_name",
+            "last_name",
+            "avatar",
         )
 
 
@@ -44,16 +40,16 @@ class CustomUserCreateSerializer(UserCreateSerializer):
     class Meta:
         model = User
         fields = (
-            'id',
-            'email',
-            'username',
-            'first_name',
-            'last_name',
-            'password',
+            "id",
+            "email",
+            "username",
+            "first_name",
+            "last_name",
+            "password",
         )
 
     def create(self, validated_data):
-        password = validated_data.pop('password')
+        password = validated_data.pop("password")
         user = User.objects.create(**validated_data)
         user.set_password(password)
         user.save()
@@ -65,62 +61,113 @@ class AvatarSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('avatar',)
+        fields = ("avatar",)
+
+
+class PointsOfInterestSerializer(serializers.ModelSerializer):
+    photo = Base64ImageField(allow_null=True, required=False)
+
+    class Meta:
+        model = PointsOfInterest
+        fields = (
+            "name",
+            "description",
+            "latitude",
+            "longitude",
+            "category",
+            "photo",
+            "created_at",
+        )
 
 
 class RoutersSerializer(serializers.ModelSerializer):
-    author = CustomUserSerializer()
+    author = CustomUserSerializer(read_only=True)
+    photo = Base64ImageField(allow_null=True, required=False)
+    points = serializers.SerializerMethodField()
 
     class Meta:
         model = Routers
         fields = (
-            'name',
-            'description',
-            'start_date',
-            'end_date',
-            'is_public',
-            'created_at',
-            'author',
+            "name",
+            "description",
+            "start_date",
+            "end_date",
+            "is_public",
+            "created_at",
+            "photo",
+            "author",
+            "points",
         )
 
+    def get_points(self, obj):
+        # Получаем все связанные записи RoutePoints для текущего маршрута
+        route_points = obj.router_points.all()
+        # Извлекаем связанные точки PointsOfInterest
+        points_of_interest = [rp.point for rp in route_points]
+        # Сериализуем точки
+        return PointsOfInterestSerializer(points_of_interest, many=True).data
 
-class PointsOfInterestSerializer(serializers.ModelSerializer):
+
+class ShortRoutersSerializer(RoutersSerializer):
     class Meta:
-        modedel = PointsOfInterest
+        model = Routers
         fields = (
-            'name',
-            'description',
-            'location',
-            'category',
-            'is_public',
-            'created_at',
+            "name",
+            "description",
+            "start_date",
+            "end_date",
+            "is_public",
+            "created_at",
+            "photo",
         )
 
 
 class ReviewsSerializer(serializers.ModelSerializer):
-    author = CustomUserSerializer()
-    router = RoutersSerializer(many=True)
+    author = HiddenField(default=CurrentUserDefault())
+    router = ShortRoutersSerializer(read_only=True)
 
     class Meta:
         model = Reviews
         fields = (
-            'router',
-            'author',
-            'text',
-            'score',
-            'pub_date',
+            "router",
+            "author",
+            "text",
+            "score",
+            "pub_date",
         )
 
 
 class CollectionsSerializer(serializers.ModelSerializer):
-    user = CustomUserSerializer()
+    user = HiddenField(default=CurrentUserDefault())
+    routers = serializers.SerializerMethodField()
 
     class Meta:
         model = Collections
         fields = (
-            'user',
-            'name',
-            'description',
-            'is_public',
-            'created_at',
+            "user",
+            "name",
+            "description",
+            "routers",
+            "is_public",
+            "created_at",
+        )
+
+    def get_routers(self, obj):
+        # Получаем все связанные записи CollectionRouters для текущей коллекции
+        collection_routers = obj.collection_routers.all()
+        # Извлекаем связанные маршруты Routers
+        routers = [cr.router for cr in collection_routers]
+        # Сериализуем маршруты
+        return RoutersSerializer(routers, many=True).data
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    user = HiddenField(default=CurrentUserDefault())
+    routers = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Favorite
+        fields = (
+            "user",
+            "routers",
         )

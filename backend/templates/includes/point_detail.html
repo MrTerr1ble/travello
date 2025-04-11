@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}{{ point.name }}{% endblock %}
+
+{% block content %}
+<div class="container point-detail page-content">
+    <h1 class="page-header">{{ point.name }}</h1>
+
+    {% if point.photo %}
+        <img src="{{ point.photo.url }}" class="img-fluid rounded mb-4 shadow-sm router-detail router-image" alt="{{ point.name }}">
+    {% endif %}
+
+    <div class="mb-3">
+        <p class="fs-5"><strong>Описание:</strong> {{ point.description }}</p>
+    </div>
+
+    <div class="mb-3">
+        <p><strong>Категория:</strong> {{ point.category }}</p>
+        <p><strong>Координаты:</strong> {{ point.latitude }}, {{ point.longitude }}</p>
+    </div>
+
+</div>
+{% endblock %}

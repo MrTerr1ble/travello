@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Точки интереса{% endblock %}
+
+{% block content %}
+    <div class="container point-list page-content">
+        <h1 class="page-header">Точки интереса</h1>
+
+        <div class="mb-4 text-end">
+            <a href="{% url 'api:point-create' %}" class="btn btn-success">Создать точку интереса</a>
+        </div>
+
+        <div class="row">
+            {% for point in points %}
+                <div class="col-md-6 col-lg-4 mb-4" id="point-{{ point.id }}">
+                    <div class="card h-100 shadow-sm">
+                        {% if point.photo %}
+                            <img src="{{ point.photo.url }}" class="card-img-top" alt="{{ point.name }}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ point.name }}</h5>
+                            <p class="card-text">{{ point.description|truncatewords:20 }}</p>
+                            <p><strong>Категория:</strong> {{ point.category }}</p>
+                            <p><strong>Координаты:</strong> {{ point.latitude }}, {{ point.longitude }}</p>
+                        </div>
+                        <div class="card-footer bg-transparent border-top-0 text-end">
+                            <a href="{% url 'api:point-detail' point.id %}" class="btn btn-primary btn-sm">Подробнее</a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12">
+                    <p>Нет точек интереса.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

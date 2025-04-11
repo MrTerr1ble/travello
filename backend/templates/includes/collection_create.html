@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<h2>Создание коллекции</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ form.non_field_errors }}
+  <div>
+    {{ form.name.label_tag }}<br>
+    {{ form.name }}
+  </div>
+  <div>
+    {{ form.description.label_tag }}<br>
+    {{ form.description }}
+  </div>
+  <div>
+    {{ form.is_public.label_tag }}<br>
+    {{ form.is_public }}
+  </div>
+  <div>
+    <strong>{{ form.routers.label }}</strong><br>
+    {{ form.routers }}
+  </div>
+  <button type="submit">Создать</button>
+</form>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}{{ router.name }}{% endblock %}
+
+{% block content %}
+    <div class="router-detail page-content">
+        <h1 class="router-name">{{ router.name }}</h1>
+
+        {% if router.photo %}
+            <img src="{{ router.photo.url }}" class="img-fluid mb-3 router-image" alt="{{ router.name }}">
+        {% endif %}
+
+        <div class="router-description">
+            <p><strong>Описание:</strong> {{ router.description }}</p>
+            <p><strong>Начало:</strong> {{ router.start_date }}</p>
+            <p><strong>Окончание:</strong> {{ router.end_date }}</p>
+        </div>
+
+        <div class="router-points">
+            <h3>Точки интереса</h3>
+            <ul>
+                {% for rp in router.router_points.all %}
+                    <li>
+                        <a href="{% url 'api:point-detail' rp.point.id %}" class="point-link">{{ rp.point.name }}</a> - {{ rp.point.description }}
+                    </li>
+                {% empty %}
+                    <p>Нет точек интереса.</p>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="router-reviews">
+            <h3>Отзывы</h3>
+            <a href="{% url 'api:review-list' router.id %}" class="btn btn-secondary">Посмотреть отзывы</a>
+        </div>
+    </div>
+{% endblock %}
