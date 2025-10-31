@@ -66,7 +66,6 @@ class CustomLogoutView(LogoutView):
 class CustomPasswordChangeView(PasswordChangeView):
     template_name = "includes/password_change.html"
     success_url = reverse_lazy("api:login")
-    form_class = BootstrapPasswordChangeForm
 
     def form_valid(self, form):
         form.save()
