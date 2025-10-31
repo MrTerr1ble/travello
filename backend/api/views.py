@@ -1,4 +1,9 @@
-from api.forms import CollectionForm, PointsOfInterestForm, RouterForm
+from api.forms import (
+    BootstrapPasswordChangeForm,
+    CollectionForm,
+    PointsOfInterestForm,
+    RouterForm,
+)
 from api.serializers import (
     CollectionsSerializer,
     CustomUserSerializer,
