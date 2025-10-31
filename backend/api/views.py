@@ -9,8 +9,9 @@ from api.serializers import (
 )
 from django.contrib import messages
 from django.contrib.auth import get_user_model, logout
-from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.views import LoginView, LogoutView, PasswordChangeView
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
 from djoser.views import UserViewSet
 from rest_framework import viewsets
 from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
@@ -55,6 +56,20 @@ class CustomLogoutView(LogoutView):
         logout(request)
         # Перенаправление после выхода
         return redirect("login")
+
+
+class CustomPasswordChangeView(PasswordChangeView):
+    template_name = "includes/password_change.html"
+    success_url = reverse_lazy("api:login")
+
+    def form_valid(self, form):
+        form.save()
+        logout(self.request)
+        messages.success(
+            self.request,
+            "Пароль успешно изменён. Пожалуйста, войдите заново.",
+        )
+        return redirect(self.get_success_url())
 
 
 class RoutersViewSet(viewsets.ModelViewSet):
