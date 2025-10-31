@@ -3,6 +3,7 @@ from api.views import (
     CollectionsViewSet,
     CustomLoginView,
     CustomLogoutView,
+    CustomPasswordChangeView,
     CustomUserViewSet,
     PointsOfInterestViewSet,
     ReviewsViewSet,
@@ -77,6 +78,11 @@ urlpatterns = [
     path("login/", CustomLoginView.as_view(), name="login"),
     path(
         "logout/", CustomLogoutView.as_view(next_page="api:router-list"), name="logout"
+    ),
+    path(
+        "password/change/",
+        CustomPasswordChangeView.as_view(),
+        name="password-change",
     ),
     path(
         "auth/registration/",
