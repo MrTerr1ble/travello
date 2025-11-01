@@ -1,4 +1,5 @@
 import base64
+import re
 
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
@@ -47,6 +48,13 @@ class CustomUserCreateSerializer(UserCreateSerializer):
             "last_name",
             "password",
         )
+
+    def validate_password(self, value):
+        if not re.fullmatch(r"\d+[A-Za-zА-Яа-яЁё]+\d+", value):
+            raise serializers.ValidationError(
+                "Пароль должен состоять из цифр, затем букв и снова цифр."
+            )
+        return super().validate_password(value)
 
     def create(self, validated_data):
         password = validated_data.pop("password")
