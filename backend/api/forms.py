@@ -1,3 +1,5 @@
+import re
+
 from django import forms
 from django.contrib.auth.forms import PasswordChangeForm, UserCreationForm
 from trail.models import (
@@ -143,6 +145,15 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = User
         fields = ("username", "email")
+
+
+    def clean_password2(self):
+        password2 = super().clean_password2()
+        if password2 and not re.fullmatch(r"\d+[A-Za-zА-Яа-яЁё]+\d+", password2):
+            raise forms.ValidationError(
+                "Пароль должен состоять из цифр, затем букв и снова цифр."
+            )
+        return password2
 
 
 class BootstrapPasswordChangeForm(PasswordChangeForm):
