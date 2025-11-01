@@ -81,18 +81,34 @@ def secure_delete(path: str):
 
 def has_admin(db_path: str) -> bool:
     """
-    Проверка условия из п.4:
-    'Правильность парольной фразы определяется по наличию ... администратора' :contentReference[oaicite:17]{index=17}
-    Для стандартной Django таблицы auth_user проверяем is_superuser=1.
-    Если у тебя кастомная модель пользователя — поменяй запрос.
+    Возвращает True, если найден хотя бы один пользователь с правами администратора.
+    Мы пробуем сначала кастомную таблицу users_user (для кастомной модели),
+    а если её нет, fallback на стандартную auth_user.
     """
+
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
+
+    count_admin = 0
+
+    # 1. Попытка: кастомная модель пользователя
     try:
-        cur.execute("SELECT COUNT(*) FROM auth_user WHERE is_superuser=1")
+        cur.execute("SELECT COUNT(*) FROM users_user WHERE is_superuser=1")
         row = cur.fetchone()
-        count_admin = row[0] if row else 0
+        if row and row[0] > 0:
+            count_admin = row[0]
     except Exception:
-        count_admin = 0
+        pass
+
+    # 2. Если пока не нашли, пробуем стандартную таблицу auth_user
+    if count_admin == 0:
+        try:
+            cur.execute("SELECT COUNT(*) FROM auth_user WHERE is_superuser=1")
+            row = cur.fetchone()
+            if row and row[0] > 0:
+                count_admin = row[0]
+        except Exception:
+            pass
+
     conn.close()
     return count_admin > 0
