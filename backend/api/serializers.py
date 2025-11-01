@@ -1,13 +1,17 @@
 import base64
-
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
-from djoser.serializers import UserCreateSerializer, UserSerializer
+from djoser.serializers import PasswordSerializer, UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 from rest_framework.serializers import CurrentUserDefault, HiddenField
 from trail.models import Collections, Favorite, PointsOfInterest, Reviews, Routers
 
 User = get_user_model()
+
+from .password_validators import (
+    PASSWORD_DIGIT_LETTER_DIGIT_MESSAGE,
+    is_digit_letter_digit_password,
+)
 
 
 class Base64ImageField(serializers.ImageField):
@@ -48,12 +52,24 @@ class CustomUserCreateSerializer(UserCreateSerializer):
             "password",
         )
 
+    def validate_password(self, value):
+        if not is_digit_letter_digit_password(value):
+            raise serializers.ValidationError(PASSWORD_DIGIT_LETTER_DIGIT_MESSAGE)
+        return super().validate_password(value)
+
     def create(self, validated_data):
         password = validated_data.pop("password")
         user = User.objects.create(**validated_data)
         user.set_password(password)
         user.save()
         return user
+
+
+class CustomPasswordSerializer(PasswordSerializer):
+    def validate_new_password(self, value):
+        if not is_digit_letter_digit_password(value):
+            raise serializers.ValidationError(PASSWORD_DIGIT_LETTER_DIGIT_MESSAGE)
+        return super().validate_new_password(value)
 
 
 class AvatarSerializer(serializers.ModelSerializer):

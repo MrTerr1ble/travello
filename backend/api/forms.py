@@ -9,6 +9,11 @@ from trail.models import (
 )
 from users.models import User
 
+from .password_validators import (
+    PASSWORD_DIGIT_LETTER_DIGIT_MESSAGE,
+    is_digit_letter_digit_password,
+)
+
 
 class RouterForm(forms.ModelForm):
     points_of_interest = forms.ModelMultipleChoiceField(
@@ -145,6 +150,13 @@ class CustomUserCreationForm(UserCreationForm):
         fields = ("username", "email")
 
 
+    def clean_password2(self):
+        password2 = super().clean_password2()
+        if password2 and not is_digit_letter_digit_password(password2):
+            raise forms.ValidationError(PASSWORD_DIGIT_LETTER_DIGIT_MESSAGE)
+        return password2
+
+
 class BootstrapPasswordChangeForm(PasswordChangeForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -152,3 +164,9 @@ class BootstrapPasswordChangeForm(PasswordChangeForm):
             existing_classes = field.widget.attrs.get("class", "")
             classes = f"{existing_classes} form-control".strip()
             field.widget.attrs["class"] = classes
+
+    def clean_new_password2(self):
+        password2 = super().clean_new_password2()
+        if password2 and not is_digit_letter_digit_password(password2):
+            raise forms.ValidationError(PASSWORD_DIGIT_LETTER_DIGIT_MESSAGE)
+        return password2
